@@ -91,17 +91,17 @@ class Generator(nn.Module):
     def __init__(self, input_channels=1, output_channels=1):
         super(Generator, self).__init__()
         
-        # Initial convolution layers
+        # Simplified architecture with fewer layers and residual blocks
         model = [
             nn.ReflectionPad2d(3),
-            nn.Conv2d(input_channels, 64, kernel_size=7),
-            nn.InstanceNorm2d(64),
+            nn.Conv2d(input_channels, 32, kernel_size=7),
+            nn.InstanceNorm2d(32),
             nn.ReLU(inplace=True)
         ]
         
-        # Downsampling
-        in_channels = 64
-        for _ in range(2):
+        # Reduced downsampling
+        in_channels = 32
+        for _ in range(1):
             out_channels = in_channels * 2
             model += [
                 nn.Conv2d(in_channels, out_channels, kernel_size=3, stride=2, padding=1),
@@ -110,12 +110,12 @@ class Generator(nn.Module):
             ]
             in_channels = out_channels
         
-        # Residual blocks
-        for _ in range(9):
+        # Fewer residual blocks
+        for _ in range(3):
             model += [ResidualBlock(in_channels)]
         
-        # Upsampling
-        for _ in range(2):
+        # Reduced upsampling
+        for _ in range(1):
             out_channels = in_channels // 2
             model += [
                 nn.ConvTranspose2d(in_channels, out_channels, kernel_size=3, stride=2, padding=1, output_padding=1),
