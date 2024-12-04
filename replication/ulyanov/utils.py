@@ -140,6 +140,7 @@ def compute_content_loss(mat_c: Tensor, mat_g: Tensor) -> Tensor:
 
     return cost_content
 
+
 def compute_layer_style_loss(mat_s: Tensor, mat_g: Tensor) -> Tensor:
     """
     computes the style loss
@@ -156,8 +157,38 @@ def compute_layer_style_loss(mat_s: Tensor, mat_g: Tensor) -> Tensor:
     gs = gram_over_time(mat_s)
     gg = gram_over_time(mat_g)
 
-    cost_style_layer = (
-        1.0 / (4 * (n_c ** 2) * (n_h * n_w)) * torch.sum((gs - gg) ** 2)
-    )
+    cost_style_layer = 1.0 / (4 * (n_c**2) * (n_h * n_w)) * torch.sum((gs - gg) ** 2)
 
     return cost_style_layer
+
+
+def mel_wave_to_spectrum(in_wave: NDArray, sr: int, **kwargs) -> NDArray:
+    """
+    convert an audio wave to a mel spectogram
+
+    ### Parameters
+    in_wave (NDArray): the input wave
+    sr (int): the sampling rate of the input wave
+    kwargs: any other arguments to be passed to librosa.feature.melspectogram
+
+    ### Returns
+    NDArray: the spectrum and the phase
+    """
+    mel_signal = librosa.feature.melspectrogram(y=in_wave, sr=sr, **kwargs)
+    spectrogram = np.abs(mel_signal)
+    return spectrogram
+
+
+def mel_spectrum_to_wave(spectrum: NDArray, sr: int, **kwargs) -> NDArray:
+    """
+    convert a mel spectrum to an audio wave
+
+    ### Parameters
+    spectrum (NDArray): the spectrum - a numpy ndarray
+    sr (int): sampling rate
+    kwargs: any other arguments to be passed to librosa.feature.inverse.mel_to_audio
+
+    ### Returns
+    NDArray: the audio wave
+    """
+    return librosa.feature.inverse.mel_to_audio(spectrum, sr=sr, **kwargs)
