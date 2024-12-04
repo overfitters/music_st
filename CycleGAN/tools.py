@@ -5,11 +5,22 @@ import torchaudio
 import numpy as np
 from torch.utils.data import Dataset, DataLoader
 import torchvision.transforms as transforms
+import librosa
 
 class MusicStyleDataset(Dataset):
-    def __init__(self, style_audio_path, content_audio_path, transform=None):
+    def __init__(self, style_audio_path, content_audio_path, sample_rate=22050, transform=None, use_q_transform=False):
+        """
+        Args:
+            style_audio_path (str): Path to the directory containing style audio files.
+            content_audio_path (str): Path to the directory containing content audio files.
+            sample_rate (int): Sampling rate for the audio files. Defaults to 22050 Hz.
+            transform (callable): Transform to apply to the audio (e.g., Mel-Spectrogram). Defaults to None.
+            use_q_transform (bool): Whether to use the Q-transform instead of Mel-Spectrogram. Defaults to False.
+        """
         self.style_audios = self._load_audio_files(style_audio_path)
         self.content_audios = self._load_audio_files(content_audio_path)
+        self.sample_rate = sample_rate  # Default: 22050 Hz
+        self.use_q_transform = use_q_transform
         self.transform = transform or self._default_transform()
     
     def _load_audio_files(self, path):
@@ -18,25 +29,46 @@ class MusicStyleDataset(Dataset):
     
     def _default_transform(self):
         return torchaudio.transforms.MelSpectrogram(
-            sample_rate=22050,  # Common sample rate
+            sample_rate=self.sample_rate,  # Common sample rate
             n_mels=128,  # Number of mel bands
             n_fft=2048,  # FFT window size
             hop_length=512  # Hop length between frames
         )
     
+    def _clip_audio(self, audio):
+        max_length = 30 * self.sample_rate  # 30 seconds in samples
+        return audio[:, :max_length]  # Assuming mono; adjust for stereo
+    
+    def _q_transform(self, audio):
+        cqt = librosa.cqt(
+            audio.numpy(),
+            sr=self.sample_rate,
+            hop_length=512,
+            fmin=32.70,  # Lowest frequency: C1
+            n_bins=84,   # 7 octaves * 12 bins per octave
+            bins_per_octave=12
+        )
+        return np.abs(cqt)  # Use magnitude of CQT
+    
     def __len__(self):
         return min(len(self.style_audios), len(self.content_audios))
     
     def __getitem__(self, idx):
-        style_audio = self.style_audios[idx]
-        content_audio = self.content_audios[idx]
-        
-        style_spec = self.transform(style_audio)
-        content_spec = self.transform(content_audio)
-        
+        style_audio = self._clip_audio(self.style_audios[idx])
+        content_audio = self._clip_audio(self.content_audios[idx])
+
+        if self.use_q_transform:
+            # Apply Q-transform
+            style_spec = self._q_transform(style_audio)
+            content_spec = self._q_transform(content_audio)
+        else:
+            # Apply Mel-Spectrogram
+            style_spec = self.transform(style_audio)
+            content_spec = self.transform(content_audio)
+
         return {
-            'style': style_spec,
-            'content': content_spec
+            'style': torch.tensor(style_spec, dtype=torch.float32),
+            'content': torch.tensor(content_spec, dtype=torch.float32)
         }
 
 class ResidualBlock(nn.Module):
