@@ -192,3 +192,34 @@ def mel_spectrum_to_wave(spectrum: NDArray, sr: int, **kwargs) -> NDArray:
     NDArray: the audio wave
     """
     return librosa.feature.inverse.mel_to_audio(spectrum, sr=sr, **kwargs)
+
+def cqt_wave_to_spectrum(in_wave: NDArray, sr: int, **kwargs) -> NDArray:
+    """
+    convert an audio wave to a cqt spectogram
+
+    ### Parameters
+    in_wave (NDArray): the input wave
+    sr (int): the sampling rate of the input wave
+    kwargs: any other arguments to be passed to librosa.cqt
+
+    ### Returns
+    NDArray: the spectrum and the phase
+    """
+    cqt_signal = librosa.cqt(y=in_wave, sr=sr, **kwargs)
+    cqt_spec = np.abs(cqt_signal)
+    return cqt_spec
+
+
+def cqt_spectrum_to_wave(spectrum: NDArray, sr: int, **kwargs) -> NDArray:
+    """
+    convert a cqt spectrum to an audio wave
+
+    ### Parameters
+    spectrum (NDArray): the spectrum - a numpy ndarray
+    sr (int): sampling rate
+    kwargs: any other arguments to be passed to librosa.icqt
+
+    ### Returns
+    NDArray: the audio wave
+    """
+    return librosa.icqt(spectrum, sr=sr, **kwargs)
