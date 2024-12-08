@@ -22,6 +22,7 @@ LOGGER = logging.getLogger("model")
 TRAIN_PATH = "../val_pairs/info.txt"
 VAL_PATH = "../train_pairs/info.txt"
 
+
 class Model(nn.Module):
     def __init__(self):
         super().__init__()
@@ -52,7 +53,7 @@ class Model(nn.Module):
         )
 
         self.vq = VQEmbedding(
-            num_embeddings=2048, embedding_dim=1024, init_mode="fan_out"
+            num_embeddings=2048, embedding_dim=1024, init_mode="fan_out", axis=1
         )
 
         self.style_encoder_1d = nn.Sequential(
@@ -74,6 +75,8 @@ class Model(nn.Module):
             input_size=1024, hidden_size=1024, batch_first=True
         )
 
+        self.style_encoder_0d = nn.Sequential()
+
         self.decoder_modules = nn.ModuleList(
             [
                 nn.Sequential(
@@ -89,7 +92,11 @@ class Model(nn.Module):
                         nn.Sequential(
                             nn.BatchNorm1d(num_features=1024),
                             nn.LeakyReLU(negative_slope=0.1),
-                            RNNWrapper(rnn=nn.GRU(input_size=1024, hidden_size=1024)),
+                            RNNWrapper(
+                                nn.GRU(
+                                    input_size=1024, hidden_size=1024, batch_first=True
+                                )
+                            ),
                         )
                     ),
                     nn.BatchNorm1d(num_features=1024),
@@ -116,7 +123,11 @@ class Model(nn.Module):
                         nn.Sequential(
                             nn.BatchNorm1d(num_features=1024),
                             nn.LeakyReLU(negative_slope=0.1),
-                            RNNWrapper(rnn=nn.GRU(input_size=1024, hidden_size=1024)),
+                            RNNWrapper(
+                                rnn=nn.GRU(
+                                    input_size=1024, hidden_size=1024, batch_first=True
+                                )
+                            ),
                         )
                     ),
                     nn.BatchNorm1d(num_features=1024),
@@ -139,7 +150,11 @@ class Model(nn.Module):
                             nn.BatchNorm1d(num_features=in_chans),
                             nn.LeakyReLU(negative_slope=0.1),
                             RNNWrapper(
-                                rnn=nn.GRU(input_size=in_chans, hidden_size=in_chans)
+                                rnn=nn.GRU(
+                                    input_size=in_chans,
+                                    hidden_size=in_chans,
+                                    batch_first=True,
+                                )
                             ),
                         )
                     ),
@@ -173,17 +188,17 @@ class Model(nn.Module):
 
         return decoded, losses
 
-    def encode_content(self, input):
-        encoded = self.content_encoder(input)
+    def encode_content(self, inp):
+        encoded = self.content_encoder(inp)
         if self.vq is None:
             return encoded, encoded, {}
         return self.vq(encoded)
 
-    def encode_style(self, input, length):
-        encoded = self.style_encoder_1d(input)
+    def encode_style(self, inp, length):
+        encoded = self.style_encoder_1d(inp)
 
         # Mask positions corresponding to padding
-        length = (length // (input.shape[2] / encoded.shape[2])).to(torch.int)
+        length = (length // (inp.shape[2] / encoded.shape[2])).to(torch.int)
         mask = (
             torch.arange(encoded.shape[2], device=encoded.device) < length[:, None]
         )[:, None, :]
@@ -191,12 +206,13 @@ class Model(nn.Module):
 
         if self.style_encoder_rnn is not None:
             encoded = encoded.transpose(1, 2)
+            length_cpu = length.cpu().to(torch.int64)
             encoded = nn.utils.rnn.pack_padded_sequence(
-                encoded, length.clamp(min=1), batch_first=True, enforce_sorted=False
+                encoded, length_cpu.clamp(min=1), batch_first=True, enforce_sorted=False
             )
             _, encoded = self.style_encoder_rnn(encoded)
             # Get rid of layer dimension
-            encoded = encoded.transpose(0, 1).reshape(input.shape[0], -1)
+            encoded = encoded.transpose(0, 1).reshape(inp.shape[0], -1)
         else:
             # Compute the Gram matrix, normalized by the length squared
             encoded /= mask.sum(dim=2, keepdim=True) + torch.finfo(encoded.dtype).eps
@@ -269,18 +285,16 @@ class Experiment:
             loader_train = torch.utils.data.DataLoader(
                 batch_size=16,
                 num_workers=8,
-                dataset=self._get_dataset("train"),
+                dataset=self._get_dataset("train", lazy=True),
                 collate_fn=util.collate_padded_tuples,
                 shuffle=True,
             )
 
-            loader_val = (
-                torch.utils.data.DataLoader(
-                    batch_size=16,
-                    num_workers=8,
-                    dataset=self._get_dataset("val", lazy=False),
-                    collate_fn=util.collate_padded_tuples,
-                ),
+            loader_val = torch.utils.data.DataLoader(
+                batch_size=16,
+                num_workers=8,
+                dataset=self._get_dataset("val", lazy=True),
+                collate_fn=util.collate_padded_tuples,
             )
 
             num_epochs = 4
@@ -460,7 +474,7 @@ class Experiment:
                 )
 
         losses["total"] = sum(
-            loss
+            loss.item()
             for name, loss in losses.items()
             if name not in ["commitment", "style_kl"]
         )
@@ -542,4 +556,5 @@ if __name__ == "__main__":
         level=logging.INFO,
         format="[%(levelname)s %(asctime)s %(filename)s:%(lineno)s] %(message)s",
     )
+    torch.autograd.set_detect_anomaly(True)
     main()

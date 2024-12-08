@@ -4,12 +4,9 @@ from torch import nn
 class RNNWrapper(nn.Module):
     """Wrapper for plugging an RNN into a CNN."""
 
-    def __init__(self, rnn=None, return_state=False, return_output=None):
+    def __init__(self, rnn, return_state=False, return_output=None):
         super().__init__()
-        if rnn is not None:
-            self.rnn = rnn
-        else:
-            self.rnn = nn.GRU(input_size=1024, hidden_size=1024)
+        self.rnn = rnn
         self.return_state = return_state
         self.return_output = return_output or not return_state
 
@@ -32,10 +29,10 @@ class ResidualWrapper(nn.Module):
         if module is not None:
             self.module = module
 
-    def forward(self, input):
-        output = self.module(input)
-        if output.shape != input.shape:
+    def forward(self, inp):
+        output = self.module(inp)
+        if output.shape != inp.shape:
             raise RuntimeError(
-                f"Expected output to have shape {input.shape}, got {output.shape}"
+                f"Expected output to have shape {inp.shape}, got {output.shape}"
             )
-        return output + input
+        return output + inp
