@@ -1,6 +1,6 @@
-fma/
-*.wav
 *.mp3
+*.wav
+fma/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
