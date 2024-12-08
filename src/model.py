@@ -283,7 +283,7 @@ class Experiment:
             self.model.train(True)
 
             loader_train = torch.utils.data.DataLoader(
-                batch_size=16,
+                batch_size=32,
                 num_workers=8,
                 dataset=self._get_dataset("train", lazy=True),
                 collate_fn=collate_padded_tuples,
@@ -291,13 +291,13 @@ class Experiment:
             )
 
             loader_val = torch.utils.data.DataLoader(
-                batch_size=16,
+                batch_size=32,
                 num_workers=8,
                 dataset=self._get_dataset("val", lazy=True),
                 collate_fn=collate_padded_tuples,
             )
 
-            num_epochs = 4
+            num_epochs = 128
             val_period = 500
             log_period = 1
             sample_period = 4
