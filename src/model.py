@@ -12,7 +12,7 @@ import torch
 import torch.utils.tensorboard
 from torch import nn
 
-import util
+from util import collate_padded_tuples, markdown_format_code
 from data import AudioTupleDataset
 from nn_util import ResidualWrapper, RNNWrapper
 from vq import VQEmbedding
@@ -278,7 +278,7 @@ class Experiment:
 
     def train(self):
         with torch.utils.tensorboard.SummaryWriter(log_dir=self.logdir) as tb_writer:
-            tb_writer.add_text("model", util.markdown_format_code(repr(self.model)))
+            tb_writer.add_text("model", markdown_format_code(repr(self.model)))
 
             self.model.train(True)
 
@@ -286,7 +286,7 @@ class Experiment:
                 batch_size=16,
                 num_workers=8,
                 dataset=self._get_dataset("train", lazy=True),
-                collate_fn=util.collate_padded_tuples,
+                collate_fn=collate_padded_tuples,
                 shuffle=True,
             )
 
@@ -294,7 +294,7 @@ class Experiment:
                 batch_size=16,
                 num_workers=8,
                 dataset=self._get_dataset("val", lazy=True),
-                collate_fn=util.collate_padded_tuples,
+                collate_fn=collate_padded_tuples,
             )
 
             num_epochs = 4
@@ -386,7 +386,7 @@ class Experiment:
             dataset=AudioTupleDataset(
                 path=pairs_path, sr=self.sr, preprocess_fn=self.preprocess, lazy=False
             ),
-            collate_fn=util.collate_padded_tuples,
+            collate_fn=collate_padded_tuples,
         )
         loader = loader_fn(**(dict(batch_size=batch_size) if batch_size else {}))
 
