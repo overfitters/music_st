@@ -1,6 +1,8 @@
 *.mp3
 *.wav
 fma/
+val_pairs/
+train_pairs/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
