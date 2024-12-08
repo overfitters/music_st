@@ -7,7 +7,7 @@ class VQEmbedding(nn.Module):
         super().__init__()
         self.embedding = nn.Embedding(num_embeddings, embedding_dim)
         self._use_codebook_loss = use_codebook_loss
-        nn.init.kaiming_uniform_(self.embedding.weight, init_mode=init_mode)
+        nn.init.kaiming_uniform_(self.embedding.weight, mode=init_mode)
         self._axis = axis
 
     def forward(self, inp):

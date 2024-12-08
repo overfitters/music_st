@@ -19,7 +19,7 @@ from vq import VQEmbedding
 
 LOGGER = logging.getLogger("model")
 
-TRAIN_PATH = "../val_paris/info.txt"
+TRAIN_PATH = "../val_pairs/info.txt"
 VAL_PATH = "../train_pairs/info.txt"
 
 class Model(nn.Module):
@@ -267,7 +267,7 @@ class Experiment:
             self.model.train(True)
 
             loader_train = torch.utils.data.DataLoader(
-                batch_size=64,
+                batch_size=16,
                 num_workers=8,
                 dataset=self._get_dataset("train"),
                 collate_fn=util.collate_padded_tuples,
@@ -276,7 +276,7 @@ class Experiment:
 
             loader_val = (
                 torch.utils.data.DataLoader(
-                    batch_size=64,
+                    batch_size=16,
                     num_workers=8,
                     dataset=self._get_dataset("val", lazy=False),
                     collate_fn=util.collate_padded_tuples,
@@ -285,7 +285,7 @@ class Experiment:
 
             num_epochs = 4
             val_period = 500
-            log_period = 20
+            log_period = 1
             sample_period = 4
 
             i = 0

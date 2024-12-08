@@ -3,6 +3,7 @@
 fma/
 val_pairs/
 train_pairs/
+logs/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
