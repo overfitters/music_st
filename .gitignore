@@ -3,6 +3,8 @@
 fma/
 val_pairs/
 train_pairs/
+val_pairs_trip/
+train_pairs_trip/
 logs/
 
 # Byte-compiled / optimized / DLL files
