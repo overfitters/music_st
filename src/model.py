@@ -283,7 +283,7 @@ class Experiment:
             self.model.train(True)
 
             loader_train = torch.utils.data.DataLoader(
-                batch_size=32,
+                batch_size=16,
                 num_workers=8,
                 dataset=self._get_dataset("train", lazy=True),
                 collate_fn=collate_padded_tuples,
@@ -291,7 +291,7 @@ class Experiment:
             )
 
             loader_val = torch.utils.data.DataLoader(
-                batch_size=32,
+                batch_size=16,
                 num_workers=8,
                 dataset=self._get_dataset("val", lazy=True),
                 collate_fn=collate_padded_tuples,
@@ -381,7 +381,7 @@ class Experiment:
 
     def run_files(self, pairs_path, output_list_path, output_prefix, batch_size=None):
         loader_fn = torch.utils.data.DataLoader(
-            batch_size=256,
+            batch_size=16,
             num_workers=8,
             dataset=AudioTupleDataset(
                 path=pairs_path, sr=self.sr, preprocess_fn=self.preprocess, lazy=False
