@@ -1,4 +1,5 @@
 from pathlib import Path
+from typing import Union
 
 import librosa
 import numpy as np
@@ -63,7 +64,7 @@ def stft_wave_to_spectrum(
 def stft_spectrum_to_wave(
     spectrum: NDArray,
     n_fft: int = 512,
-    keep_phase: NDArray | None = None,
+    keep_phase: Union[NDArray, None] = None,
 ) -> NDArray:
     """
     convert a spectrum to an audio wave
