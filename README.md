@@ -15,3 +15,4 @@ Style Transfer for Music
     - It divides each `fma` file into 3, 10 second files and generates 3 pairs (3 training examples) for each file.
     - Will have to change `TRAIN_PATH` and `VAL_PATH` in `src/model.py` if you want to use these.
     - Requires more compute.
+- `src/ft.ipynb` is the notebook used for fine tuning. It requires the weights from the original paper that are avaiable on [their repo](https://github.com/cifkao/ss-vq-vae).
