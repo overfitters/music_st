@@ -12,15 +12,15 @@ import torch
 import torch.utils.tensorboard
 from torch import nn
 
-from util import collate_padded_tuples, markdown_format_code
 from data import AudioTupleDataset
 from nn_util import ResidualWrapper, RNNWrapper
+from util import collate_padded_tuples, markdown_format_code
 from vq import VQEmbedding
 
 LOGGER = logging.getLogger("model")
 
-TRAIN_PATH = "../val_pairs_trip/info.txt"
-VAL_PATH = "../train_pairs_trip/info.txt"
+TRAIN_PATH = "../val_pairs/info.txt"
+VAL_PATH = "../train_pairs/info.txt"
 
 
 class Model(nn.Module):
@@ -298,9 +298,9 @@ class Experiment:
             )
 
             num_epochs = 256
-            val_period = 100
+            val_period = 200
             log_period = 1
-            sample_period = 1
+            sample_period = 2
 
             i = 0
             for epoch in range(num_epochs):

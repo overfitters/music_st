@@ -11,3 +11,7 @@ Style Transfer for Music
 - `train_pairs` & `val_pairs` contain the pairs for the main model that is based on the `vq_vae` paper.
   - these are generated using the `prepare_data.ipynb` notebook.
   - requires `fma` to be present in the same directory. (or change `DATASET` in `prepare_data.ipynb`)
+  - `prepare_data.ipynb` can also be used to generate `train_pairs_triple` and `val_pairs_triple`, which will contain close to 22K training examples & 2.4K validation examples.
+    - It divides each `fma` file into 3, 10 second files and generates 3 pairs (3 training examples) for each file.
+    - Will have to change `TRAIN_PATH` and `VAL_PATH` in `src/model.py` if you want to use these.
+    - Requires more compute.
