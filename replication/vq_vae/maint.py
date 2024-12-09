@@ -4,7 +4,7 @@ import librosa
 import torch
 from torch.utils.data import Dataset, DataLoader
 from torch import nn
-from vq_vae_model import Experiment, VQEmbedding, StyleEncoder, Decoder
+from vq_vae_t import Experiment, VQEmbedding, StyleEncoder, Decoder
 
 # Step 1: Define FMA Dataset and Transformations
 
@@ -107,8 +107,8 @@ def collate_padded_tuples(batch):
 
 def main():
     # Set paths
-    audio_dir = "/content/fma_small/fma_small"  # Path to the FMA_small dataset
-    logdir = "/content/logdir"  # Directory for logs and model outputs
+    audio_dir = "/DesktopLocal/College/DL/Project/fma_small/fma_small"  # Path to the FMA_small dataset
+    logdir = "/DesktopLocal/College/DL/Project/vq_vae_t/content/logdir"  # Directory for logs and model outputs
 
     # Create dataset and dataloader
     fma_dataset = FMAAudioDataset(
