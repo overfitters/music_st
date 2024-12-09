@@ -19,8 +19,8 @@ from vq import VQEmbedding
 
 LOGGER = logging.getLogger("model")
 
-TRAIN_PATH = "../val_pairs/info.txt"
-VAL_PATH = "../train_pairs/info.txt"
+TRAIN_PATH = "../val_pairs_trip/info.txt"
+VAL_PATH = "../train_pairs_trip/info.txt"
 
 
 class Model(nn.Module):
@@ -297,10 +297,10 @@ class Experiment:
                 collate_fn=collate_padded_tuples,
             )
 
-            num_epochs = 128
-            val_period = 500
+            num_epochs = 256
+            val_period = 100
             log_period = 1
-            sample_period = 4
+            sample_period = 1
 
             i = 0
             for epoch in range(num_epochs):
