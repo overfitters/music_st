@@ -6,6 +6,7 @@ train_pairs/
 val_pairs_trip/
 train_pairs_trip/
 logs/
+outputs/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
