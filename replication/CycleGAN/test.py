@@ -100,10 +100,6 @@ class CycleGANTrainer:
                 d_content_loss.backward()
                 self.optimizer_D_content.step()
 
-def mel_spectrogram_to_audio(mel_spec, inverse_transform):
-    audio = inverse_transform(mel_spec)
-    return audio
-
 def train_music_style_transfer(style_path, content_path):
     # Configuration
     config = {
